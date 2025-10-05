@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-# 🧩 1️⃣ Load dataset
+
 def load_data(train_path: str, test_path: str) -> pd.DataFrame:
     """Load train and test datasets, then merge them."""
     df_train = pd.read_csv(train_path, sep="\t")
@@ -11,7 +11,7 @@ def load_data(train_path: str, test_path: str) -> pd.DataFrame:
     return df_all
 
 
-# 🧩 2️⃣ Basic info
+
 def show_basic_info(df: pd.DataFrame):
     """Print dataset overview: rows, columns, dtypes, and null counts."""
     print("📊 Total number of rows:", len(df))
@@ -22,7 +22,6 @@ def show_basic_info(df: pd.DataFrame):
     print(df.isnull().sum())
 
 
-# 🧩 3️⃣ Label distribution
 def plot_label_distribution(df: pd.DataFrame):
     """Show count and percentage of Fake vs Real news."""
     print("\n📰 Label distribution:")
@@ -40,7 +39,6 @@ def plot_label_distribution(df: pd.DataFrame):
     plt.show()
 
 
-# 🧩 4️⃣ Subject analysis
 def plot_subject_distribution(df: pd.DataFrame):
     """Show top subjects and Fake vs Real counts per subject."""
     print("\n📚 Number of subjects:", df['subject'].nunique())
@@ -75,7 +73,6 @@ def plot_subject_distribution(df: pd.DataFrame):
     plt.show()
 
 
-# 🧩 5️⃣ Missing and duplicate data check
 def check_missing_and_duplicates(df: pd.DataFrame):
     """Check missing values and duplicates."""
     print("🔍 Missing values per column:")
@@ -86,18 +83,18 @@ def check_missing_and_duplicates(df: pd.DataFrame):
     print(f"📝 Duplicate texts: {df['text'].duplicated().sum()}")
 
 
-# 🧩 6️⃣ Main pipeline
+
 def main():
     df = load_data("train.tsv", "test.tsv")
 
-    # Basic dataset info
+    
     show_basic_info(df)
 
-    # Label and subject distributions
+    
     plot_label_distribution(df)
     plot_subject_distribution(df)
 
-    # Missing and duplicate data
+    
     check_missing_and_duplicates(df)
 
 
