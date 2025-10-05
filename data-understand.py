@@ -83,12 +83,20 @@ def check_missing_and_duplicates(df: pd.DataFrame):
     print(f"📝 Duplicate texts: {df['text'].duplicated().sum()}")
 
 
+def export_combined_data(df: pd.DataFrame, output_path: str = "combined_dataset.csv"):
+    """Save the merged train + test dataset to a CSV file."""
+    df.to_csv(output_path, index=False, encoding='utf-8')
+    print(f"✅ Combined dataset exported successfully to: {output_path}")
+
+
 
 def main():
     df = load_data("train.tsv", "test.tsv")
+    export_combined_data(df, "combined_dataset.csv")
 
     
     show_basic_info(df)
+
 
     
     plot_label_distribution(df)
@@ -96,6 +104,8 @@ def main():
 
     
     check_missing_and_duplicates(df)
+
+
 
 
 if __name__ == "__main__":
