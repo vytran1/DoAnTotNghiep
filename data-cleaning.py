@@ -1,4 +1,6 @@
 import pandas as pd
+import ftfy
+from ftfy import fix_text
 
 def load_combined_data(path: str = "combined_dataset.csv") -> pd.DataFrame:
     df = pd.read_csv(path)
@@ -12,7 +14,7 @@ def remove_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     print(f"🧹 Removed {before - after} rows with missing values (title/text/subject).")
     return df_cleaned
 
-def normalize_date_v2(df: pd.DataFrame) -> pd.DataFrame:
+def normalize_date(df: pd.DataFrame) -> pd.DataFrame:
     """Convert 'date' column to standard YYYY-MM-DD format."""
     if "date" not in df.columns:
         print("⚠️ No 'date' column found — skipping date normalization.")
@@ -127,6 +129,56 @@ def validate_date_format(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
+def check_duplicate_title_text(df: pd.DataFrame) -> int:
+    """Check how many duplicate rows have the same title and text."""
+    duplicate_rows = df[df.duplicated(subset=["title", "text"], keep=False)]
+    count = len(duplicate_rows)
+    
+    print(f"🔍 Found {count} rows with duplicated (title + text).")
+    
+    # Nếu muốn xem thử vài dòng mẫu
+    if count > 0:
+        print("📄 Example duplicates:")
+        print(duplicate_rows.head(5))
+    
+    return count
+
+def remove_duplicate_title_text(df: pd.DataFrame) -> pd.DataFrame:
+    """Remove duplicate rows based on title + text combination."""
+    before = len(df)
+    df = df.drop_duplicates(subset=["title", "text"], keep="first").reset_index(drop=True)
+    after = len(df)
+    removed = before - after
+    
+    print(f"🧹 Removed {removed} duplicate rows based on (title + text).")
+    print(f"✅ Cleaned dataset now has {after} rows.")
+    return df
+
+def fix_encoding_issues(df: pd.DataFrame) -> pd.DataFrame:
+    """Sửa lỗi ký tự encoding (ví dụ: â€™, â€œ, Ã©) trong title và text."""
+    from ftfy import fix_text
+
+    for col in ["title", "text"]:
+        if col in df.columns:
+            before_examples = df[col].head(3).tolist()
+            print(f"\n🔧 Fixing encoding in '{col}' column...")
+            print("Before:")
+            for i, ex in enumerate(before_examples):
+                print(f"  {i+1}. {ex[:120]}")
+
+            df[col] = df[col].astype(str).apply(fix_text)
+
+            after_examples = df[col].head(3).tolist()
+            print("\nAfter:")
+            for i, ex in enumerate(after_examples):
+                print(f"  {i+1}. {ex[:120]}")
+        else:
+            print(f"⚠️ Column '{col}' not found, skipping.")
+    
+    print("\n✅ Encoding issues fixed successfully!")
+    return df
+
+
 def export_to_csv(df: pd.DataFrame, path: str = "combined_dataset_cleaned.csv"):
     """Lưu DataFrame ra file CSV."""
     try:
@@ -143,9 +195,15 @@ def main():
     # 2️⃣ Remove missing values
     df = remove_missing_values(df)
 
-    df = normalize_date_v2(df)
+    df = fix_encoding_issues(df)
+
+    df = normalize_date(df)
 
     validate_date_format(df)
+
+    check_duplicate_title_text(df)
+
+    df = remove_duplicate_title_text(df)
 
     export_to_csv(df)
 
