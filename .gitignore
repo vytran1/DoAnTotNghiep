@@ -146,6 +146,7 @@ venv.bak/
 
 notebooks/nltk_data/
 data/processed/
+.pkl
 
 # Spyder project settings
 .spyderproject
