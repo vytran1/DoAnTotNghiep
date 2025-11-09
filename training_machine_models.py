@@ -33,7 +33,7 @@ def plot_confusion_matrix(cm, classes, title='Confusion Matrix', cmap=plt.cm.Blu
 
 print("--- 1. Loading and Preparing Data ---")
 try:
-    df = pd.read_csv('./data/processed/data_for_tfidf.csv')
+    df = pd.read_csv('./data/processed/data_for_tfidf_merged.csv')
     df.dropna(inplace=True)
 except FileNotFoundError:
     print("File not found! Make sure 'data_for_tfidf.csv' is in the correct path.")
