@@ -58,7 +58,7 @@ print("Explainer ready.")
 # --- 4. Tính SHAP toàn cục ---
 print("--- Task 4: Tính toán SHAP toàn cục ---")
 X_test_sample = shap.sample(X_test_tfidf, N_TEST_SAMPLE)
-X_test_sample_dense = X_test_sample.toarray()
+X_test_sample_dense = X_test_sample.toarray() if hasattr(X_test_sample, "toarray") else np.array(X_test_sample)
 shap_values = explainer.shap_values(X_test_sample_dense, nsamples=NSAMPLES)
 print("Đã tính SHAP values.")
 

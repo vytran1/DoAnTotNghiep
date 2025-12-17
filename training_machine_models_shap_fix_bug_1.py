@@ -283,7 +283,7 @@ try:
     print("Sử dụng shap.kmeans để tóm tắt 50 cụm từ tập train...")
     # SHAP cần một bộ dữ liệu nền (thường là từ tập train) để so sánh
     # Vì tập train lớn, ta dùng K-Means để tóm tắt nó
-    background_data = shap.kmeans(X_train_tfidf_shap, 50)
+    background_data = shap.kmeans(X_train_tfidf_shap.toarray(), 50)
     print("Đã tạo xong dữ liệu nền.")
 
     # --- Task 3: Khởi tạo Explainer ---
@@ -312,7 +312,8 @@ try:
     
     # Tính SHAP values
     # nsamples='auto' (hoặc 100) để tăng tốc độ
-    shap_values = explainer.shap_values(X_test_sample_shap, nsamples=100)
+    X_test_sample_shap_dense = X_test_sample_shap.toarray()
+    shap_values = explainer.shap_values(X_test_sample_shap_dense, nsamples=100)
     print("Đã tính xong SHAP values.")
 
     # Trực quan hóa (Lưu ý: Class 1 = 'Real', Class 0 = 'Fake')
@@ -321,14 +322,14 @@ try:
     # Giải thích cho Class 1 (Tin THẬT)
     # shap_values[1] là giá trị SHAP cho class 1
     plt.figure()
-    shap.summary_plot(shap_values[1], X_test_sample_shap, feature_names=feature_names, plot_type="bar", max_display=20, show=False)
+    shap.summary_plot(shap_values[1], X_test_sample_shap_dense, feature_names=feature_names, plot_type="bar", max_display=20, show=False)
     plt.title("20 từ ảnh hưởng lớn nhất đến dự đoán 'Tin THẬT' (Class 1)")
     plt.tight_layout()
     plt.show()
 
     # Giải thích cho Class 0 (Tin GIẢ) - (Đây là cái bạn hỏi 'Tin giả index 1'?)
     plt.figure()
-    shap.summary_plot(shap_values[0], X_test_sample_shap, feature_names=feature_names, plot_type="bar", max_display=20, show=False)
+    shap.summary_plot(shap_values[0], X_test_sample_shap_dense, feature_names=feature_names, plot_type="bar", max_display=20, show=False)
     plt.title("20 từ ảnh hưởng lớn nhất đến dự đoán 'Tin GIẢ' (Class 0)")
     plt.tight_layout()
     plt.show()

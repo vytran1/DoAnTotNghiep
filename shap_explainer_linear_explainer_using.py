@@ -7,15 +7,12 @@ import warnings
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-# ==================== CẤU HÌNH ====================
 MODEL_PATH = 'final_model.joblib'
 VECTORIZER_PATH = 'final_tfidf_vectorizer.joblib'
 DATA_PATH = './data/processed/data_for_tfidf_merged.csv'
 
-# Với LinearExplainer có thể tăng số mẫu vì rất nhanh!
-N_TEST_SAMPLE = 500   # Tăng từ 100 lên 500 (vẫn chạy nhanh!)
+N_TEST_SAMPLE = 500 
 
-# Tắt cảnh báo
 warnings.filterwarnings('ignore', category=UserWarning)
 
 print("="*60)
@@ -35,7 +32,6 @@ except FileNotFoundError as e:
     print("   → Kiểm tra đường dẫn file model và vectorizer!")
     exit(1)
 
-# Load dataset và split giống lúc train
 try:
     df = pd.read_csv(DATA_PATH)
     df.dropna(inplace=True)
@@ -62,7 +58,6 @@ print(f"   ✓ Features: {len(feature_names)}")
 # ==================== TASK 2 & 3: KHỞI TẠO EXPLAINER ====================
 print("\n[2/5] ⚡ Khởi tạo LinearExplainer (tối ưu cho LR)...")
 
-# LinearExplainer - NHANH GẤP 100 LẦN KernelExplainer!
 explainer = shap.LinearExplainer(
     loaded_model,
     X_train_tfidf,
@@ -77,7 +72,6 @@ print(f"\n[3/5] 🧮 Tính SHAP values cho {N_TEST_SAMPLE} mẫu test...")
 # Sample test data
 X_test_sample = shap.sample(X_test_tfidf, min(N_TEST_SAMPLE, len(X_test)))
 
-# Tính SHAP - CỰC NHANH với LinearExplainer!
 shap_values = explainer.shap_values(X_test_sample)
 print(f"   ✓ SHAP values computed! Shape: {shap_values.shape}")
 
@@ -100,7 +94,6 @@ plt.title('Top 20 Features Quan Trọng Nhất (Fake News Detection)',
 plt.gca().invert_yaxis()
 plt.grid(axis='x', alpha=0.3, linestyle='--', linewidth=0.5)
 
-# Thêm giá trị vào từng bar
 for i, (bar, val) in enumerate(zip(bars, top_values)):
     plt.text(val, i, f' {val:.4f}', va='center', fontsize=9, color='black')
 
@@ -134,7 +127,6 @@ print("\n[5/5] 🌊 Vẽ Waterfall plots cho mẫu cụ thể...")
 
 y_pred_test = loaded_model.predict(X_test_tfidf)
 
-# Chuyển y_test về numpy array
 y_test_array = y_test.values if hasattr(y_test, 'values') else np.array(y_test)
 
 # Tìm mẫu dự đoán đúng

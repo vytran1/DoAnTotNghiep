@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>SHAP Analyzer</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* CSS nội tuyến để chạy ngay không cần file */
+      body {
+        font-family: Arial, sans-serif;
+        width: 400px;
+        padding: 15px;
+      }
+      #check-btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      #check-btn:hover {
+        background-color: #0056b3;
+      }
+      #status {
+        text-align: center;
+        margin-top: 10px;
+        font-style: italic;
+      }
+      #result-display {
+        margin-top: 15px;
+      }
+      #prediction {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+      }
+      .real {
+        color: green;
+      }
+      .fake {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>SHAP News Analyzer</h3>
+    <button id="check-btn">🔍 Phân tích bài viết này</button>
+
+    <div id="status"></div>
+
+    <div id="result-display" style="display: none">
+      <h2 id="prediction"></h2>
+      <p style="text-align: center" id="probability"></p>
+      <canvas id="shap-chart"></canvas>
+    </div>
+
+    <script src="chart.js-4.4.3.min.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
