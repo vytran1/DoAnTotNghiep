@@ -35,13 +35,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   async function callBackendAPI(text) {
     try {
-      const response = await fetch("http://127.0.0.1:5000/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: text }),
-      });
+      const response = await fetch(
+        "https://unhued-unaging-jayson.ngrok-free.dev/predict",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: text }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Lỗi API: ${response.statusText}`);
@@ -104,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
         labels: labels,
         datasets: [
           {
-            label: "Ảnh hưởng SHAP (đẩy về REAL)",
+            label: "Ảnh hưởng SHAP",
             data: values,
             backgroundColor: colors,
             borderColor: colors,

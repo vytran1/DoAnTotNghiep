@@ -226,3 +226,159 @@ def predict():
 if __name__ == '__main__':
     logger.info("\nStarting Flask development server...")
     app.run(host='127.0.0.1', port=5000, debug=True)
+
+
+# import joblib
+# import shap
+# import numpy as np
+# import pandas as pd
+# from flask import Flask, request, jsonify
+# from flask_cors import CORS
+# import warnings
+# import logging
+# from datetime import datetime
+# import sys
+# import io
+
+# # Đảm bảo output hỗ trợ tiếng Việt/ký tự đặc biệt
+# sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+# sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+# # ==================== LOGGING SETUP ====================
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format='%(asctime)s [%(levelname)s] %(message)s',
+#     handlers=[
+#         logging.FileHandler('api_logs.log', encoding='utf-8'),
+#         logging.StreamHandler(sys.stdout)
+#     ]
+# )
+# logger = logging.getLogger(__name__)
+
+# # ==================== CONFIG ====================
+# MODEL_PATH = '../model/five_training/final_model_full_data.joblib'
+# VECTORIZER_PATH = '../model/five_training/final_tfidf_vectorizer_full_data.joblib'
+# TRAIN_DATA_PATH = '../../data/processed/train_data_tfidf_clean.csv'
+# N_BACKGROUND_SAMPLES = 100
+# MAX_TEXT_LENGTH = 70000
+
+# warnings.filterwarnings('ignore', category=UserWarning)
+
+# # ==================== KHỞI TẠO APP FLASK ====================
+# app = Flask(__name__)
+# CORS(app)
+
+# # ==================== TẢI MODEL VÀ DATA ====================
+# logger.info("="*70)
+# logger.info("Bắt đầu khởi động API Server (ML - TF-IDF)...")
+# logger.info("Logic Nhãn: 0 = REAL, 1 = FAKE")
+# logger.info("="*70)
+
+# try:
+#     logger.info("🔹 Đang tải model...")
+#     loaded_model = joblib.load(MODEL_PATH)
+    
+#     logger.info("🔹 Đang tải vectorizer...")
+#     loaded_vectorizer = joblib.load(VECTORIZER_PATH)
+#     feature_names = loaded_vectorizer.get_feature_names_out()
+
+#     logger.info("🔹 Đang chuẩn bị SHAP background từ train data...")
+#     df_train = pd.read_csv(TRAIN_DATA_PATH)
+#     df_train.dropna(inplace=True)
+#     X_train_tfidf = loaded_vectorizer.transform(df_train['text_tfidf'])
+#     background_data = shap.sample(X_train_tfidf, N_BACKGROUND_SAMPLES)
+
+    
+#     explainer = shap.LinearExplainer(
+#         loaded_model,
+#         background_data,
+#         feature_perturbation="interventional"
+#     )
+
+    
+#     if isinstance(explainer.expected_value, (np.ndarray, list)):
+#         BASE_VALUE = explainer.expected_value[1] # Lấy base value của class 1
+#     else:
+#         BASE_VALUE = explainer.expected_value
+
+#     logger.info(f"✅ Hệ thống sẵn sàng - Base Value (FAKE): {BASE_VALUE:.4f}")
+
+# except Exception as e:
+#     logger.error(f"❌ Lỗi khởi động: {e}", exc_info=True)
+#     explainer = None
+
+# # ==================== ROUTES ====================
+
+# @app.route('/predict', methods=['POST'])
+# def predict():
+#     request_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+#     logger.info(f"NEW REQUEST [{request_id}]")
+    
+#     if explainer is None:
+#         return jsonify({"error": "Model not loaded"}), 500
+    
+#     try:
+#         data = request.json
+#         text_to_predict = data.get('text', '')
+        
+#         if not text_to_predict or len(text_to_predict) < 10:
+#             return jsonify({"error": "Text invalid hoặc quá ngắn"}), 400
+
+        
+#         instance_tfidf = loaded_vectorizer.transform([text_to_predict])
+#         probs = loaded_model.predict_proba(instance_tfidf)[0]
+        
+        
+#         prob_real = float(probs[0])
+#         prob_fake = float(probs[1])
+        
+#         prediction_label = "FAKE" if prob_fake > 0.5 else "REAL"
+#         confidence = max(prob_real, prob_fake)
+
+        
+#         shap_values_all = explainer.shap_values(instance_tfidf)
+        
+        
+#         if isinstance(shap_values_all, list):
+#             shap_values_instance = shap_values_all[1]
+#         else:
+#             shap_values_instance = shap_values_all
+            
+#         nonzero_indices = instance_tfidf.indices
+#         top_features = []
+        
+#         for idx in nonzero_indices:
+#             feature_name = feature_names[idx]
+#             val = shap_values_instance[idx]
+#             if abs(val) > 0.001:
+#                 top_features.append({
+#                     "feature": feature_name,
+#                     "shap_value": float(val) 
+#                 })
+        
+        
+#         top_features.sort(key=lambda x: abs(x['shap_value']), reverse=True)
+
+#         # 3. Response
+#         response_data = {
+#             "prediction": prediction_label,
+#             "probability_real": prob_real,
+#             "probability_fake": prob_fake,
+#             "confidence": confidence,
+#             "base_value": float(BASE_VALUE),
+#             "top_features": top_features[:20],
+#             "metadata": {
+#                 "request_id": request_id,
+#                 "num_features_detected": len(nonzero_indices)
+#             }
+#         }
+        
+#         logger.info(f"[{request_id}] Result: {prediction_label} | Fake: {prob_fake:.2f}")
+#         return jsonify(response_data)
+        
+#     except Exception as e:
+#         logger.error(f"[{request_id}] ERROR: {str(e)}", exc_info=True)
+#         return jsonify({"error": str(e)}), 500
+
+# if __name__ == '__main__':
+#     app.run(host='127.0.0.1', port=5000, debug=True)
